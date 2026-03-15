@@ -592,6 +592,45 @@ const DIVISIONS = [
   }
 ];
 
+// ===== COMPARISON COLORS =====
+const COMPARE_COLORS = [
+  { border: '#E2001A', bg: 'rgba(226,0,26,0.12)', point: '#E2001A' },
+  { border: '#3b82f6', bg: 'rgba(59,130,246,0.12)', point: '#3b82f6' },
+  { border: '#22c55e', bg: 'rgba(34,197,94,0.12)', point: '#22c55e' }
+];
+
+// ===== PIPELINE =====
+const DIVISION_ORDER = ['8va', '7ma', '6ta', '5ta', '4ta', 'Reserva'];
+const PROMOTION_THRESHOLDS = { '8va': 65, '7ma': 67, '6ta': 69, '5ta': 71, '4ta': 73, 'Reserva': 76 };
+
+// ===== PHYSICAL HISTORY GENERATOR =====
+const PHYSICAL_MONTHS = ['Abr 25','May 25','Jun 25','Jul 25','Ago 25','Sep 25','Oct 25','Nov 25','Dic 25','Ene 26','Feb 26','Mar 26'];
+
+function generatePhysicalHistory(player) {
+  const base = player.physical;
+  const history = [];
+  for (let i = 0; i < 12; i++) {
+    const progress = i / 11;
+    const noise = () => (Math.random() - 0.5) * 0.6;
+    const growthRate = player.age <= 17 ? 0.08 : player.age <= 19 ? 0.05 : 0.02;
+    history.push({
+      month: PHYSICAL_MONTHS[i],
+      speed: +(base.speed * (1 - growthRate + growthRate * progress) + noise()).toFixed(1),
+      distance: +(base.distance * (1 - growthRate + growthRate * progress) + noise() * 0.3).toFixed(1),
+      sprints: Math.round(base.sprints * (1 - growthRate + growthRate * progress) + noise() * 2)
+    });
+  }
+  return history;
+}
+
+// Generate physical histories for all players (seeded by player id for consistency)
+(function() {
+  const savedRandom = Math.random;
+  PLAYERS.forEach(p => {
+    p.physicalHistory = generatePhysicalHistory(p);
+  });
+})();
+
 // ===== HELPERS =====
 function getPositionGroup(pos) {
   if (pos === "GK") return "GK";
@@ -649,4 +688,30 @@ function getAllPositions() {
 
 function getAllDivisionIds() {
   return DIVISIONS.map(d => d.id);
+}
+
+function contractStatus(dateStr) {
+  const m = contractMonthsRemaining(dateStr);
+  if (m <= 6) return 'red';
+  if (m <= 12) return 'yellow';
+  return 'green';
+}
+
+function getPositionGroupLabel(group) {
+  return { GK: 'Arqueros', DEF: 'Defensores', MID: 'Mediocampistas', ATK: 'Atacantes' }[group] || group;
+}
+
+function formatMonthYear(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('es-AR', { month: 'short', year: 'numeric' });
+}
+
+function getGrowthTrend(history, metric) {
+  if (!history || history.length < 6) return 'stable';
+  const recent = history.slice(-3).reduce((s, h) => s + h[metric], 0) / 3;
+  const prev = history.slice(-6, -3).reduce((s, h) => s + h[metric], 0) / 3;
+  const diff = ((recent - prev) / prev) * 100;
+  if (diff > 2) return 'improving';
+  if (diff < -2) return 'declining';
+  return 'stable';
 }

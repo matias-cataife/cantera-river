@@ -22,6 +22,9 @@ function navigateTo(viewId) {
     case 'dashboard': renderDashboard(); break;
     case 'divisions': renderDivisions(); break;
     case 'players': renderPlayers(); break;
+    case 'compare': renderCompare(); break;
+    case 'pipeline': renderPipeline(); break;
+    case 'contracts': renderContracts(); break;
     case 'academic': renderAcademic(); break;
     case 'representatives': renderRepresentatives(); break;
   }
