@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inferiores Data-Driven — Inteligencia de Datos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #FFFFFF;
+            --bg-card: #f8f9fa;
+            --bg-card-hover: #fff;
+            --accent-red: #E10600;
+            --accent-dark: #B00500;
+            --accent-light: #FF2D28;
+            --accent-glow: rgba(225, 6, 0, 0.15);
+            --accent-subtle: rgba(225, 6, 0, 0.06);
+            --text-primary: #0a0a0a;
+            --text-secondary: #333333;
+            --text-muted: #666666;
+            --border-color: #e5e5e5;
+            --border-accent: rgba(225, 6, 0, 0.2);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.08);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.1);
+            --shadow-accent: 0 8px 30px rgba(225, 6, 0, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========== SLIDE ENGINE ========== */
+        .slides-container {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(80px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-dark);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            transform: translateX(-80px);
+            opacity: 0;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(circle at 15% 85%, rgba(225, 6, 0, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 15%, rgba(225, 6, 0, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .slide.active .slide-content {
+            animation: fadeInUp 0.7s ease-out 0.15s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== TYPOGRAPHY ========== */
+        h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        h1 .accent { color: var(--accent-red); }
+
+        h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            font-size: 1.35rem;
+            line-height: 1.65;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .eyebrow {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent-red);
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        /* ========== TITLE SLIDE ========== */
+        .slide.title-slide {
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+        }
+
+        .slide.title-slide::before {
+            background:
+                radial-gradient(circle at 50% 50%, rgba(225, 6, 0, 0.06) 0%, transparent 60%),
+                radial-gradient(circle at 20% 80%, rgba(225, 6, 0, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(225, 6, 0, 0.03) 0%, transparent 40%);
+        }
+
+        .slide.title-slide .slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .title-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 40px rgba(225, 6, 0, 0.25);
+        }
+
+        .title-logo svg {
+            width: 44px;
+            height: 44px;
+            fill: white;
+        }
+
+        .slide.title-slide h1 {
+            font-size: 4.2rem;
+            max-width: 900px;
+        }
+
+        .title-divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-red);
+            border-radius: 2px;
+            margin: 1.5rem auto;
+        }
+
+        .title-footer {
+            margin-top: 3rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .title-footer .tag {
+            padding: 0.5rem 1.2rem;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.2rem;
+            transition: all 0.35s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-accent);
+            background: var(--bg-card-hover);
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            background: var(--accent-glow);
+            color: var(--accent-red);
+        }
+
+        .card h3 { font-size: 1.4rem; margin-bottom: 0.6rem; }
+        .card p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0; line-height: 1.6; }
+
+        /* ========== STAT CARDS ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.8rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--accent-red);
+            font-family: 'Space Mono', monospace;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ========== TWO COLUMNS ========== */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3.5rem;
+            align-items: center;
+        }
+
+        .two-columns.narrow-left {
+            grid-template-columns: 0.9fr 1.1fr;
+        }
+
+        .two-columns.narrow-right {
+            grid-template-columns: 1.1fr 0.9fr;
+        }
+
+        /* ========== AGENDA GRID ========== */
+        .agenda-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .agenda-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agenda-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--accent-red);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .agenda-card:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-accent);
+            transform: translateY(-3px);
+        }
+
+        .agenda-card:hover::after { opacity: 1; }
+
+        .agenda-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--accent-red);
+            opacity: 0.15;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            line-height: 1;
+        }
+
+        .agenda-card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        .agenda-card p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+
+        .agenda-card .agenda-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .agenda-card .agenda-tags .tag {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            background: var(--accent-glow);
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+
+        /* ========== FEATURE LIST ========== */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.9rem 0;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            line-height: 1.5;
+        }
+
+        .feature-list li .check {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--accent-glow);
+            color: var(--accent-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* ========== HIGHLIGHT BOX ========== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(225, 6, 0, 0.06) 0%, rgba(225, 6, 0, 0.02) 100%);
+            border: 1px solid rgba(225, 6, 0, 0.15);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box.big-stat {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .highlight-box .big-number {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--accent-red);
+            font-family: 'Space Mono', monospace;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box .big-label {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ========== PROCESS STEPS ========== */
+        .process-steps {
+            display: flex;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .process-step {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.8rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .process-step:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .process-step .step-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-red);
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .process-step h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .process-step p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        .process-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -1rem;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-right: 2px solid var(--accent-red);
+            border-bottom: 2px solid var(--accent-red);
+            transform: translateY(-50%) rotate(-45deg);
+            opacity: 0.4;
+        }
+
+        /* ========== CLOSING SLIDE ========== */
+        .closing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 2.5rem 0;
+        }
+
+        .closing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .closing-card:hover {
+            border-color: var(--accent-red);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .closing-card .cc-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .closing-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .closing-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* ========== CHAPTER COVER ========== */
+        .slide.chapter-cover {
+            text-align: center;
+            background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+        }
+
+        .slide.chapter-cover .slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slide.chapter-cover .chapter-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--accent-red);
+            opacity: 0.12;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .slide.chapter-cover h2 {
+            font-size: 3.2rem;
+            max-width: 700px;
+        }
+
+        .slide.chapter-cover p {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ========== PIPELINE VIZ ========== */
+        .pipeline-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 2rem 0;
+        }
+
+        .pipeline-node {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.2rem 1.8rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .pipeline-node:hover {
+            border-color: var(--accent-red);
+            box-shadow: var(--shadow-accent);
+        }
+
+        .pipeline-node .pn-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+        .pipeline-node .pn-label { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+        .pipeline-node .pn-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+        .pipeline-arrow {
+            width: 40px;
+            height: 2px;
+            background: var(--accent-red);
+            position: relative;
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+
+        .pipeline-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--accent-red);
+            border-bottom: 2px solid var(--accent-red);
+            transform: rotate(-45deg);
+        }
+
+        /* ========== TABLE ========== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            background: var(--accent-glow);
+            color: var(--accent-dark);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td {
+            padding: 0.85rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(225, 6, 0, 0.02); }
+
+        /* ========== METRIC PILLS ========== */
+        .metric-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 1rem 0;
+        }
+
+        .metric-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .metric-pill:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* ========== BADGES ========== */
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.red {
+            background: var(--accent-glow);
+            color: var(--accent-red);
+        }
+
+        .badge.gray {
+            background: #f0f0f0;
+            color: var(--text-muted);
+        }
+
+        /* ========== BREAKDOWN CARDS ========== */
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .breakdown-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .breakdown-card:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .breakdown-card .bc-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .breakdown-card .bc-pct {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-red);
+        }
+
+        .breakdown-card .bc-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .breakdown-card .bc-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .breakdown-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 0.8rem;
+        }
+
+        .breakdown-card ul li {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            padding: 0.3rem 0;
+            padding-left: 1.2rem;
+            position: relative;
+        }
+
+        .breakdown-card ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.65rem;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            opacity: 0.4;
+        }
+
+        /* ========== DIAMOND CHART ========== */
+        .diamond-container {
+            width: 320px;
+            height: 320px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .diamond-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .diamond-label {
+            position: absolute;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            width: 140px;
+        }
+
+        .diamond-label.top { top: -10px; left: 50%; transform: translateX(-50%); }
+        .diamond-label.right { right: -75px; top: 50%; transform: translateY(-50%); }
+        .diamond-label.bottom { bottom: -10px; left: 50%; transform: translateX(-50%); }
+        .diamond-label.left { left: -75px; top: 50%; transform: translateY(-50%); }
+
+        .diamond-label small {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ========== CASE STUDY CARD ========== */
+        .case-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 1.2rem;
+            align-items: flex-start;
+        }
+
+        .case-card:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .case-card .case-flag {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .case-card .case-body h4 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .case-card .case-body p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        /* ========== TRAFFIC LIGHT ========== */
+        .traffic-light {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .tl-item {
+            flex: 1;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tl-item:hover { transform: translateY(-3px); }
+
+        .tl-item.green {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1.5px solid rgba(34, 197, 94, 0.3);
+        }
+        .tl-item.yellow {
+            background: rgba(234, 179, 8, 0.08);
+            border: 1.5px solid rgba(234, 179, 8, 0.3);
+        }
+        .tl-item.red-tl {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .tl-item .tl-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .tl-item.green .tl-value { color: #16a34a; }
+        .tl-item.yellow .tl-value { color: #ca8a04; }
+        .tl-item.red-tl .tl-value { color: #dc2626; }
+
+        .tl-item .tl-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tl-item.green .tl-label { color: #16a34a; }
+        .tl-item.yellow .tl-label { color: #ca8a04; }
+        .tl-item.red-tl .tl-label { color: #dc2626; }
+
+        .tl-item .tl-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* ========== STAGGER ANIMATIONS ========== */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .slide.active .stagger-item {
+            animation: staggerIn 0.5s ease-out forwards;
+        }
+
+        .slide.active .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+        .slide.active .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+        .slide.active .stagger-item:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes staggerIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== NAVIGATION ========== */
+        .nav-controls {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            border: 1.5px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-btn {
+            background: white;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: white;
+            box-shadow: 0 4px 15px rgba(225, 6, 0, 0.3);
+        }
+
+        .slide-counter {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* ========== PROGRESS BAR ========== */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-red) 0%, var(--accent-light) 100%);
+            transition: width 0.4s ease;
+            z-index: 1000;
+        }
+
+        /* ========== SECTION INDICATOR ========== */
+        .section-indicator {
+            position: fixed;
+            top: 24px;
+            right: 28px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            border: 1.5px solid var(--border-color);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        /* ========== LOGO FOOTER ========== */
+        .logo-footer {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 1000;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-footer:hover {
+            opacity: 1;
+        }
+
+        .logo-footer img {
+            height: 55px;
+            width: auto;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1200px) {
+            .slide { padding: 40px 50px; }
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2.2rem; }
+            .two-columns { gap: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="section-indicator" id="sectionIndicator"></div>
+
+    <div class="slides-container">
+
+        <!-- ==================== SLIDE 1: TITLE ==================== -->
+        <div class="slide title-slide active" data-section="Inicio">
+            <div class="slide-content">
+                <div class="title-logo">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h1>Inferiores <span class="accent">Data-Driven</span></h1>
+                <div class="title-divider"></div>
+                <p class="subtitle" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Inteligencia de datos aplicada al desarrollo de jugadores en inferiores. Casos validados en las mejores academias del mundo.
+                </p>
+                <div class="title-footer">
+                    <span class="tag">Bio-banding</span>
+                    <span class="tag">Predicci&oacute;n de Lesiones</span>
+                    <span class="tag">M&eacute;tricas Avanzadas</span>
+                    <span class="tag">Evaluaci&oacute;n Cognitiva</span>
+                    <span class="tag">Proyecci&oacute;n de Potencial</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 2: THE CONTEXT ==================== -->
+        <div class="slide" data-section="Contexto">
+            <div class="slide-content">
+                <span class="eyebrow">El contexto</span>
+                <h2>Las mejores academias del mundo ya usan datos</h2>
+                <p>Los clubes europeos l&iacute;deres invierten fuertemente en data science para sus divisiones inferiores. La ventaja competitiva ya no es solo t&eacute;cnica: es informacional.</p>
+
+                <div class="stats-grid" style="margin-top: 2rem;">
+                    <div class="stat-card stagger-item">
+                        <div class="stat-value">75%</div>
+                        <div class="stat-label">de graduados de Ajax llegan a primera (con data + TIPS)</div>
+                    </div>
+                    <div class="stat-card stagger-item">
+                        <div class="stat-value">200+</div>
+                        <div class="stat-label">indicadores de ML analiza Ajax por jugador juvenil</div>
+                    </div>
+                    <div class="stat-card stagger-item">
+                        <div class="stat-value">250</div>
+                        <div class="stat-label">jugadores juveniles en el skills.lab de Bayern Munich</div>
+                    </div>
+                    <div class="stat-card stagger-item">
+                        <div class="stat-value">33</div>
+                        <div class="stat-label">ligas juveniles cubre TransferLab Emerge con ML</div>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 1.5rem;">
+                    <p style="font-size: 1.15rem; margin-bottom: 0; text-align: center;">
+                        <strong style="color: var(--accent-red);">La oportunidad:</strong> aplicar estas metodolog&iacute;as probadas a nuestras inferiores, adaptadas a la realidad del f&uacute;tbol argentino.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SLIDE 3: AGENDA ==================== -->
+        <div class="slide" data-section="Agenda">
+            <div class="slide-content">
+                <span class="eyebrow">Agenda</span>
+                <h2>Seis pilares de desarrollo data-driven</h2>
+                <p style="max-width: 750px;">Cada feature est&aacute; respaldada por casos de &eacute;xito en academias europeas y papers acad&eacute;micos validados.</p>
+
+                <div class="agenda-grid">
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">01</div>
+                        <h3>Bio-banding</h3>
+                        <p>Tracking de maduraci&oacute;n biol&oacute;gica para no descartar talentos tard&iacute;os ni sobrecargar a los precoces.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">PHV</span>
+                            <span class="tag">Antropometr&iacute;a</span>
+                            <span class="tag">Premier League</span>
+                        </div>
+                    </div>
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">02</div>
+                        <h3>Prevenci&oacute;n de Lesiones</h3>
+                        <p>Modelo predictivo basado en carga de entrenamiento para detectar riesgo antes de que ocurra la lesi&oacute;n.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">ACWR</span>
+                            <span class="tag">Chelsea FC</span>
+                            <span class="tag">ML</span>
+                        </div>
+                    </div>
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">03</div>
+                        <h3>M&eacute;tricas Avanzadas</h3>
+                        <p>Ir m&aacute;s all&aacute; de goles y asistencias con xG, pases progresivos, PPDA y m&eacute;tricas por posici&oacute;n.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">xG</span>
+                            <span class="tag">StatsBomb</span>
+                            <span class="tag">Por posici&oacute;n</span>
+                        </div>
+                    </div>
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">04</div>
+                        <h3>Evaluaci&oacute;n Cognitiva</h3>
+                        <p>Medir inteligencia futbol&iacute;stica: velocidad de decisi&oacute;n, lectura del juego, liderazgo.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">Dortmund</span>
+                            <span class="tag">Bayern</span>
+                            <span class="tag">Radar cognitivo</span>
+                        </div>
+                    </div>
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">05</div>
+                        <h3>Four Corner Model</h3>
+                        <p>Framework hol&iacute;stico de evaluaci&oacute;n: t&eacute;cnico, f&iacute;sico, psicol&oacute;gico y social en una sola vista.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">EPPP</span>
+                            <span class="tag">Premier League</span>
+                            <span class="tag">Diamante</span>
+                        </div>
+                    </div>
+                    <div class="agenda-card stagger-item">
+                        <div class="agenda-number">06</div>
+                        <h3>Proyecci&oacute;n de Potencial</h3>
+                        <p>Predecir el techo de cada jugador comparando su curva de desarrollo con datos hist&oacute;ricos.</p>
+                        <div class="agenda-tags">
+                            <span class="tag">Ajax ML</span>
+                            <span class="tag">Clustering</span>
+                            <span class="tag">Curvas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 1: BIO-BANDING ==================== -->
+        <div class="slide chapter-cover" data-section="Bio-banding">
+            <div class="slide-content">
+                <div class="chapter-number">01</div>
+                <h2>Bio-banding</h2>
+                <div class="title-divider"></div>
+                <p>Tracking de maduraci&oacute;n biol&oacute;gica para evaluar jugadores por desarrollo real, no por edad cronol&oacute;gica.</p>
+            </div>
+        </div>
+
+        <!-- BIO-BANDING: CASES + PROBLEM -->
+        <div class="slide" data-section="Bio-banding">
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <span class="eyebrow">01 &mdash; Bio-banding</span>
+                        <h2>El problema de la edad cronol&oacute;gica</h2>
+                        <p>Un jugador de 14 a&ntilde;os que mide 1.80 no es comparable con otro de 14 que mide 1.55. La edad cronol&oacute;gica no refleja la maduraci&oacute;n biol&oacute;gica.</p>
+
+                        <ul class="feature-list" style="margin-top: 1.5rem;">
+                            <li>
+                                <span class="check">1</span>
+                                <span><strong>Sesgo de selecci&oacute;n:</strong> los maduradores tempranos dominan por f&iacute;sico, no por talento</span>
+                            </li>
+                            <li>
+                                <span class="check">2</span>
+                                <span><strong>Talentos perdidos:</strong> Modric, Iniesta, Messi eran chicos para su edad</span>
+                            </li>
+                            <li>
+                                <span class="check">3</span>
+                                <span><strong>Riesgo de lesi&oacute;n:</strong> la ventana PHV tiene riesgo significativamente mayor de lesiones por sobreuso</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127468;&#127463;</div>
+                            <div class="case-body">
+                                <h4>Premier League (EPPP)</h4>
+                                <p>Pioneros en torneos bio-banding. Obligatorio en las 4 categor&iacute;as de academia. 7 estudios validan la reducci&oacute;n de sesgo.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127475;&#127473;</div>
+                            <div class="case-body">
+                                <h4>Ajax (TIPS Framework)</h4>
+                                <p>Evaluaci&oacute;n en T&eacute;cnica, Insight, Personalidad, Velocidad. Ajustan expectativas por estado madurativo.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127477;&#127481;</div>
+                            <div class="case-body">
+                                <h4>Benfica</h4>
+                                <p>Planes individuales de desarrollo con perfilado de maduraci&oacute;n al ingreso a la academia. Caso de estudio Deloitte.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BIO-BANDING: WHAT WE CAN DO -->
+        <div class="slide" data-section="Bio-banding">
+            <div class="slide-content">
+                <span class="eyebrow">01 &mdash; Bio-banding</span>
+                <h2>&iquest;Qu&eacute; podemos hacer?</h2>
+                <p>Calcular el Peak Height Velocity (PHV) con la f&oacute;rmula de Mirwald y trackear el estado madurativo de cada jugador.</p>
+
+                <div class="pipeline-row" style="margin-top: 2rem;">
+                    <div class="pipeline-node stagger-item">
+                        <div class="pn-icon">&#128207;</div>
+                        <div class="pn-label">Medici&oacute;n mensual</div>
+                        <div class="pn-sub">Altura, peso, envergadura</div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-node stagger-item">
+                        <div class="pn-icon">&#128200;</div>
+                        <div class="pn-label">C&aacute;lculo PHV</div>
+                        <div class="pn-sub">F&oacute;rmula de Mirwald</div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-node stagger-item">
+                        <div class="pn-icon">&#127919;</div>
+                        <div class="pn-label">Estado madurativo</div>
+                        <div class="pn-sub">Pre-PHV / PHV / Post-PHV</div>
+                    </div>
+                    <div class="pipeline-arrow"></div>
+                    <div class="pipeline-node stagger-item" style="border-color: var(--accent-red); background: var(--accent-glow);">
+                        <div class="pn-icon">&#9888;&#65039;</div>
+                        <div class="pn-label" style="color: var(--accent-red);">Alertas</div>
+                        <div class="pn-sub">Riesgo + ratings ajustados</div>
+                    </div>
+                </div>
+
+                <div class="breakdown-grid" style="margin-top: 2rem;">
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#128207;</div>
+                            <div class="bc-title">Datos a recolectar</div>
+                        </div>
+                        <ul>
+                            <li>Altura de pie (cm) &mdash; mensual</li>
+                            <li>Altura sentado (cm) &mdash; mensual</li>
+                            <li>Peso (kg) &mdash; mensual</li>
+                            <li>Envergadura (cm) &mdash; trimestral</li>
+                            <li>Largo de piernas (cm) &mdash; trimestral</li>
+                            <li>Altura de padres &mdash; una sola vez</li>
+                        </ul>
+                    </div>
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#128736;</div>
+                            <div class="bc-title">Features en la herramienta</div>
+                        </div>
+                        <ul>
+                            <li>Timeline de maduraci&oacute;n por jugador</li>
+                            <li>Flag autom&aacute;tico en ventana PHV</li>
+                            <li>Ratings ajustados por maduraci&oacute;n</li>
+                            <li>Color por estado en vistas de divisi&oacute;n</li>
+                            <li>Predicci&oacute;n de altura adulta</li>
+                            <li>Comparaci&oacute;n maturation-adjusted</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 2: INJURY PREVENTION ==================== -->
+        <div class="slide chapter-cover" data-section="Prevenci&oacute;n de Lesiones">
+            <div class="slide-content">
+                <div class="chapter-number">02</div>
+                <h2>Prevenci&oacute;n de Lesiones</h2>
+                <div class="title-divider"></div>
+                <p>Modelo predictivo de riesgo basado en carga de entrenamiento, bienestar y estado madurativo.</p>
+            </div>
+        </div>
+
+        <!-- INJURY: CASES + MODEL -->
+        <div class="slide" data-section="Prevenci&oacute;n de Lesiones">
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <span class="eyebrow">02 &mdash; Prevenci&oacute;n de Lesiones</span>
+                        <h2>ACWR: el indicador clave</h2>
+                        <p>El Acute-to-Chronic Workload Ratio compara la carga reciente (7 d&iacute;as) contra la carga habitual (28 d&iacute;as). Picos en este ratio predicen lesiones.</p>
+
+                        <div class="traffic-light">
+                            <div class="tl-item green stagger-item">
+                                <div class="tl-value">&lt;1.3</div>
+                                <div class="tl-label">Seguro</div>
+                                <div class="tl-desc">Carga normal</div>
+                            </div>
+                            <div class="tl-item yellow stagger-item">
+                                <div class="tl-value">1.3-1.5</div>
+                                <div class="tl-label">Precauci&oacute;n</div>
+                                <div class="tl-desc">Monitorear</div>
+                            </div>
+                            <div class="tl-item red-tl stagger-item">
+                                <div class="tl-value">&gt;1.5</div>
+                                <div class="tl-label">Riesgo alto</div>
+                                <div class="tl-desc">Reducir carga</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127468;&#127463;</div>
+                            <div class="case-body">
+                                <h4>Chelsea FC Academy</h4>
+                                <p>20,913 data points de GPS en 53 jugadores. Paper publicado en MDPI Sports (2018). Encontraron diferencias posicionales significativas.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127468;&#127463;</div>
+                            <div class="case-body">
+                                <h4>Premier League (3 a&ntilde;os)</h4>
+                                <p>Estudio en British Journal of Sports Medicine: picos de ACWR &gt;2.0 correlacionan con <strong>5-7x m&aacute;s riesgo</strong> de lesi&oacute;n.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127462;&#127481;</div>
+                            <div class="case-body">
+                                <h4>RB Leipzig / KINEXON</h4>
+                                <p>Primer torneo juvenil del mundo con tracking de jugadores en tiempo real (2025). Miden carga en vivo durante competencia.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INJURY: DATA + FEATURES -->
+        <div class="slide" data-section="Prevenci&oacute;n de Lesiones">
+            <div class="slide-content">
+                <span class="eyebrow">02 &mdash; Prevenci&oacute;n de Lesiones</span>
+                <h2>Datos y modelo propuesto</h2>
+
+                <div class="two-columns" style="margin-top: 1.5rem;">
+                    <div>
+                        <h3>Datos a recolectar por sesi&oacute;n</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Dato</th>
+                                    <th>Tipo</th>
+                                    <th>Qui&eacute;n</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Distancia total (m)</td><td>N&uacute;mero</td><td>Prep. f&iacute;sico</td></tr>
+                                <tr><td>Sprints (count)</td><td>N&uacute;mero</td><td>Prep. f&iacute;sico</td></tr>
+                                <tr><td>Velocidad m&aacute;xima (km/h)</td><td>N&uacute;mero</td><td>Prep. f&iacute;sico</td></tr>
+                                <tr><td>RPE (1-10)</td><td>Escala</td><td>Jugador</td></tr>
+                                <tr><td>Horas de sue&ntilde;o</td><td>N&uacute;mero</td><td>Jugador</td></tr>
+                                <tr><td>Dolor muscular</td><td>Escala</td><td>Jugador</td></tr>
+                                <tr><td>Tipo de sesi&oacute;n</td><td>Enum</td><td>Prep. f&iacute;sico</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3>Modelo progresivo</h3>
+                        <div class="process-steps" style="flex-direction: column; gap: 1rem; margin: 0;">
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Fase 1</span>
+                                <h4>Sem&aacute;foro ACWR simple</h4>
+                                <p>Carga aguda / carga cr&oacute;nica con alertas de color</p>
+                            </div>
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Fase 2</span>
+                                <h4>Regresi&oacute;n log&iacute;stica</h4>
+                                <p>Variables: ACWR + historial lesiones + estado PHV + RPE</p>
+                            </div>
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Fase 3 (6+ meses datos)</span>
+                                <h4>XGBoost predictivo</h4>
+                                <p>Paper PMC 2023 valida ML para injury forecasting en youth soccer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 3: ADVANCED METRICS ==================== -->
+        <div class="slide chapter-cover" data-section="M&eacute;tricas Avanzadas">
+            <div class="slide-content">
+                <div class="chapter-number">03</div>
+                <h2>M&eacute;tricas Avanzadas</h2>
+                <div class="title-divider"></div>
+                <p>Ir m&aacute;s all&aacute; de goles y asistencias para capturar la contribuci&oacute;n real de cada jugador al juego.</p>
+            </div>
+        </div>
+
+        <!-- METRICS: PER POSITION -->
+        <div class="slide" data-section="M&eacute;tricas Avanzadas">
+            <div class="slide-content">
+                <span class="eyebrow">03 &mdash; M&eacute;tricas Avanzadas</span>
+                <h2>M&eacute;tricas clave por posici&oacute;n</h2>
+                <p>Cada posici&oacute;n necesita m&eacute;tricas espec&iacute;ficas. StatsBomb captura <strong>3,400+ eventos por partido</strong>. Nosotros arrancamos con las m&aacute;s impactantes.</p>
+
+                <div class="breakdown-grid" style="margin-top: 1.5rem;">
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#129351;</div>
+                            <div class="bc-title">Arqueros</div>
+                        </div>
+                        <div class="metric-pills">
+                            <span class="metric-pill">Save % por zona</span>
+                            <span class="metric-pill">Distribuci&oacute;n exitosa %</span>
+                            <span class="metric-pill">Sweeper actions</span>
+                            <span class="metric-pill">Saques con pie %</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#128737;</div>
+                            <div class="bc-title">Defensores</div>
+                        </div>
+                        <div class="metric-pills">
+                            <span class="metric-pill">Duelos ganados %</span>
+                            <span class="metric-pill">Pases progresivos</span>
+                            <span class="metric-pill">Intercepciones p/90</span>
+                            <span class="metric-pill">Carries progresivos</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#127918;</div>
+                            <div class="bc-title">Mediocampistas</div>
+                        </div>
+                        <div class="metric-pills">
+                            <span class="metric-pill">Pases al 3er tercio</span>
+                            <span class="metric-pill">Pases entre l&iacute;neas</span>
+                            <span class="metric-pill">Ball recoveries</span>
+                            <span class="metric-pill">Dist. con/sin bal&oacute;n</span>
+                        </div>
+                    </div>
+                    <div class="breakdown-card stagger-item">
+                        <div class="bc-header">
+                            <div class="bc-pct">&#9917;</div>
+                            <div class="bc-title">Delanteros</div>
+                        </div>
+                        <div class="metric-pills">
+                            <span class="metric-pill">xG (Expected Goals)</span>
+                            <span class="metric-pill">xG vs goles reales</span>
+                            <span class="metric-pill">Presiones exitosas</span>
+                            <span class="metric-pill">Toques en &aacute;rea p/90</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- METRICS: DATA COLLECTION -->
+        <div class="slide" data-section="M&eacute;tricas Avanzadas">
+            <div class="slide-content">
+                <span class="eyebrow">03 &mdash; M&eacute;tricas Avanzadas</span>
+                <h2>Qu&eacute; datos recolectar por partido</h2>
+
+                <div class="two-columns" style="margin-top: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.3rem;">M&iacute;nimo viable (8 m&eacute;tricas)</h3>
+                        <ul class="feature-list">
+                            <li><span class="check">&#10003;</span><span>Minutos jugados</span></li>
+                            <li><span class="check">&#10003;</span><span>Goles y asistencias</span></li>
+                            <li><span class="check">&#10003;</span><span>Pases completados / totales</span></li>
+                            <li><span class="check">&#10003;</span><span>Duelos ganados / totales</span></li>
+                            <li><span class="check">&#10003;</span><span>Recuperaciones</span></li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 1rem;">
+                            <p style="font-size: 1rem; margin-bottom: 0;">
+                                <strong>Carga:</strong> ~5 min por jugador post-partido.<br>
+                                El analista completa una planilla simple que se importa al sistema.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.3rem;">Expansi&oacute;n (27 m&eacute;tricas)</h3>
+                        <ul class="feature-list">
+                            <li><span class="check">+</span><span>Remates (zona, al arco, total) &rarr; xG</span></li>
+                            <li><span class="check">+</span><span>Pases progresivos y al tercio final</span></li>
+                            <li><span class="check">+</span><span>Intercepciones, tackles, faltas</span></li>
+                            <li><span class="check">+</span><span>Centros completados / totales</span></li>
+                            <li><span class="check">+</span><span>P&eacute;rdidas, tarjetas, toques en &aacute;rea</span></li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 1rem;">
+                            <p style="font-size: 1rem; margin-bottom: 0;">
+                                <strong>Derivados autom&aacute;ticos:</strong> % de pases, m&eacute;tricas por 90 min, percentiles por edad y posici&oacute;n, xG simplificado.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 4: COGNITIVE ==================== -->
+        <div class="slide chapter-cover" data-section="Evaluaci&oacute;n Cognitiva">
+            <div class="slide-content">
+                <div class="chapter-number">04</div>
+                <h2>Evaluaci&oacute;n Cognitiva</h2>
+                <div class="title-divider"></div>
+                <p>Medir la inteligencia futbol&iacute;stica: velocidad de decisi&oacute;n, lectura del juego, liderazgo y resiliencia mental.</p>
+            </div>
+        </div>
+
+        <!-- COGNITIVE: CASES + DIMENSIONS -->
+        <div class="slide" data-section="Evaluaci&oacute;n Cognitiva">
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <span class="eyebrow">04 &mdash; Evaluaci&oacute;n Cognitiva</span>
+                        <h2>Lo que no miden los n&uacute;meros tradicionales</h2>
+                        <p>El mejor jugador no es siempre el m&aacute;s r&aacute;pido o el que m&aacute;s goles hace. La inteligencia de juego separa al bueno del top.</p>
+
+                        <div class="case-card stagger-item" style="margin-top: 1.5rem;">
+                            <div class="case-flag">&#127465;&#127466;</div>
+                            <div class="case-body">
+                                <h4>Borussia Dortmund</h4>
+                                <p>Entrenamiento cognitivo desde los <strong>11 a&ntilde;os</strong>. Datos recopilados 2-3x/a&ntilde;o durante 6-7 a&ntilde;os. Miden movimientos oculares, percepci&oacute;n, scanning visual.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127465;&#127466;</div>
+                            <div class="case-body">
+                                <h4>Bayern Munich (skills.lab)</h4>
+                                <p>Arena con proyectores y sensores. Mide reconocimiento cognitivo de situaciones t&aacute;cticas junto con precisi&oacute;n t&eacute;cnica. 250 jugadores juveniles.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127477;&#127481;</div>
+                            <div class="case-body">
+                                <h4>Benfica (360S Lab)</h4>
+                                <p>Simulador indoor que combina entrenamiento t&eacute;cnico con evaluaci&oacute;n psicol&oacute;gica en las mismas sesiones.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Dimensiones a evaluar (trimestral)</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Dimensi&oacute;n</th>
+                                    <th>Escala</th>
+                                    <th>Eval&uacute;a</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Velocidad de decisi&oacute;n</td><td>1-5</td><td>DT / Psic&oacute;logo</td></tr>
+                                <tr><td>Lectura de juego</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Visi&oacute;n / Scanning</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Liderazgo en cancha</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Comunicaci&oacute;n</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Resiliencia mental</td><td>1-5</td><td>Psic&oacute;logo</td></tr>
+                                <tr><td>Actitud en entrenamiento</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Coachability</td><td>1-5</td><td>DT</td></tr>
+                                <tr><td>Presi&oacute;n competitiva</td><td>1-5</td><td>Psic&oacute;logo</td></tr>
+                                <tr><td>Relaci&oacute;n con pares</td><td>1-5</td><td>DT / Psic.</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.8rem;">
+                            <strong>Validaci&oacute;n:</strong> SpringerPlus confirma que jugadores &gt;11-12 a&ntilde;os son aptos para evaluaci&oacute;n cognitiva/t&aacute;ctica formal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 5: FOUR CORNER ==================== -->
+        <div class="slide chapter-cover" data-section="Four Corner Model">
+            <div class="slide-content">
+                <div class="chapter-number">05</div>
+                <h2>Four Corner Model</h2>
+                <div class="title-divider"></div>
+                <p>El framework de la Premier League que unifica toda la evaluaci&oacute;n en 4 dimensiones: T&eacute;cnico, F&iacute;sico, Psicol&oacute;gico y Social.</p>
+            </div>
+        </div>
+
+        <!-- FOUR CORNER: DIAMOND -->
+        <div class="slide" data-section="Four Corner Model">
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <span class="eyebrow">05 &mdash; Four Corner Model</span>
+                        <h2>Una vista, todo el jugador</h2>
+                        <p>Obligatorio en las academias de Premier League. Cada jugador tiene un score en cada esquina del diamante.</p>
+
+                        <ul class="feature-list" style="margin-top: 1.5rem;">
+                            <li>
+                                <span class="check">&#10003;</span>
+                                <span><strong>T&eacute;cnico/T&aacute;ctico:</strong> ratings actuales + m&eacute;tricas avanzadas de partido</span>
+                            </li>
+                            <li>
+                                <span class="check">&#10003;</span>
+                                <span><strong>F&iacute;sico:</strong> velocidad, distancia, sprints + estado madurativo PHV</span>
+                            </li>
+                            <li>
+                                <span class="check">&#10003;</span>
+                                <span><strong>Psicol&oacute;gico:</strong> evaluaci&oacute;n cognitiva + resiliencia + liderazgo</span>
+                            </li>
+                            <li>
+                                <span class="check">&#10003;</span>
+                                <span><strong>Social:</strong> rendimiento acad&eacute;mico + relaci&oacute;n con pares + adaptaci&oacute;n</span>
+                            </li>
+                        </ul>
+
+                        <div class="highlight-box" style="margin-top: 1rem;">
+                            <p style="font-size: 1rem; margin-bottom: 0;">
+                                <strong style="color: var(--accent-red);">El m&oacute;dulo acad&eacute;mico que ya tenemos</strong> se integra naturalmente en la esquina Social.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <div class="diamond-container">
+                            <div class="diamond-label top">T&eacute;cnico / T&aacute;ctico<small>Ratings + m&eacute;tricas</small></div>
+                            <div class="diamond-label right">F&iacute;sico<small>GPS + maduraci&oacute;n</small></div>
+                            <div class="diamond-label bottom">Social<small>Acad&eacute;mico + pares</small></div>
+                            <div class="diamond-label left">Psicol&oacute;gico<small>Cognitivo + mental</small></div>
+                            <svg viewBox="0 0 320 320">
+                                <!-- Grid lines -->
+                                <polygon points="160,40 280,160 160,280 40,160" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+                                <polygon points="160,70 250,160 160,250 70,160" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+                                <polygon points="160,100 220,160 160,220 100,160" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+                                <polygon points="160,130 190,160 160,190 130,160" fill="none" stroke="#e5e5e5" stroke-width="1"/>
+                                <!-- Axes -->
+                                <line x1="160" y1="40" x2="160" y2="280" stroke="#e5e5e5" stroke-width="1"/>
+                                <line x1="40" y1="160" x2="280" y2="160" stroke="#e5e5e5" stroke-width="1"/>
+                                <!-- Example player shape -->
+                                <polygon points="160,55 255,160 160,235 75,160" fill="rgba(225,6,0,0.1)" stroke="var(--accent-red)" stroke-width="2.5"/>
+                                <!-- Dots -->
+                                <circle cx="160" cy="55" r="5" fill="var(--accent-red)"/>
+                                <circle cx="255" cy="160" r="5" fill="var(--accent-red)"/>
+                                <circle cx="160" cy="235" r="5" fill="var(--accent-red)"/>
+                                <circle cx="75" cy="160" r="5" fill="var(--accent-red)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CHAPTER 6: TALENT PROJECTION ==================== -->
+        <div class="slide chapter-cover" data-section="Proyecci&oacute;n de Potencial">
+            <div class="slide-content">
+                <div class="chapter-number">06</div>
+                <h2>Proyecci&oacute;n de Potencial</h2>
+                <div class="title-divider"></div>
+                <p>Predecir el techo de un jugador bas&aacute;ndose en su curva de desarrollo comparada con jugadores hist&oacute;ricos similares.</p>
+            </div>
+        </div>
+
+        <!-- TALENT: CASES + MODEL -->
+        <div class="slide" data-section="Proyecci&oacute;n de Potencial">
+            <div class="slide-content">
+                <div class="two-columns">
+                    <div>
+                        <span class="eyebrow">06 &mdash; Proyecci&oacute;n de Potencial</span>
+                        <h2>La velocidad de mejora importa m&aacute;s que el rating actual</h2>
+                        <p>Un jugador con rating 60 que sube 15 puntos en 6 meses es m&aacute;s interesante que uno con rating 75 estancado.</p>
+
+                        <div class="case-card stagger-item" style="margin-top: 1.5rem;">
+                            <div class="case-flag">&#127475;&#127473;</div>
+                            <div class="case-body">
+                                <h4>Ajax &mdash; ML con 200+ indicadores</h4>
+                                <p>Machine learning para evaluar compatibilidad de talento con el estilo del club. 75% de graduados llegan a primera.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127468;&#127463;</div>
+                            <div class="case-body">
+                                <h4>TransferLab Emerge (Feb 2025)</h4>
+                                <p>33 ligas juveniles, 15,000 jugadores. Algoritmo GDA basado en cadenas de Markov que eval&uacute;a c&oacute;mo cada acci&oacute;n cambia la probabilidad de gol.</p>
+                            </div>
+                        </div>
+                        <div class="case-card stagger-item">
+                            <div class="case-flag">&#127475;&#127473;</div>
+                            <div class="case-body">
+                                <h4>SciSports</h4>
+                                <p>Ratings de calidad y potencial para 250,000+ jugadores. Monitoreo desde Sub-13 en la liga holandesa.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Qu&eacute; podemos implementar</h3>
+                        <div class="process-steps" style="flex-direction: column; gap: 1rem; margin: 1rem 0;">
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Feature 1</span>
+                                <h4>Curva de desarrollo esperada</h4>
+                                <p>Rating promedio por edad y posici&oacute;n. Comparar jugador real vs curva esperada.</p>
+                            </div>
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Feature 2</span>
+                                <h4>Clasificaci&oacute;n autom&aacute;tica</h4>
+                                <p>"Ahead of curve" / "On track" / "Behind curve" seg&uacute;n velocidad de mejora.</p>
+                            </div>
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Feature 3</span>
+                                <h4>Score de promocionabilidad</h4>
+                                <p>Probabilidad de subir de divisi&oacute;n basada en tendencia, no solo rating actual.</p>
+                            </div>
+                            <div class="process-step stagger-item">
+                                <span class="step-num">Avanzado</span>
+                                <h4>Clustering de perfiles</h4>
+                                <p>K-means para detectar arquetipos. Modelo supervisado con jugadores que llegaron a Primera como target.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== DATA REQUIREMENTS SUMMARY ==================== -->
+        <div class="slide" data-section="Datos">
+            <div class="slide-content">
+                <span class="eyebrow">Requerimientos</span>
+                <h2>Resumen de datos a recolectar</h2>
+                <p>Todo el sistema depende de la calidad y consistencia de los datos. Ac&aacute; est&aacute; el mapa completo por frecuencia.</p>
+
+                <table class="data-table" style="margin-top: 1.5rem;">
+                    <thead>
+                        <tr>
+                            <th>Frecuencia</th>
+                            <th>Datos</th>
+                            <th>Responsable</th>
+                            <th>Tiempo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Diario</strong></td>
+                            <td>Sue&ntilde;o, dolor muscular, RPE post-sesi&oacute;n</td>
+                            <td>Jugador (auto-reporte)</td>
+                            <td>1 min/jugador</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Por partido</strong></td>
+                            <td>Eventos de partido (goles, pases, duelos, etc.)</td>
+                            <td>Analista / DT</td>
+                            <td>5-15 min</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Por sesi&oacute;n</strong></td>
+                            <td>Carga f&iacute;sica (distancia, sprints, vel. m&aacute;x)</td>
+                            <td>Preparador f&iacute;sico</td>
+                            <td>5 min</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mensual</strong></td>
+                            <td>Antropometr&iacute;a (altura, peso), asistencia escolar</td>
+                            <td>M&eacute;dico / Admin</td>
+                            <td>10 min/jugador</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trimestral</strong></td>
+                            <td>Evaluaci&oacute;n cognitiva (10 dimensiones), Four Corner completo</td>
+                            <td>DT / Psic&oacute;logo</td>
+                            <td>15 min/jugador</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Por evento</strong></td>
+                            <td>Lesiones (tipo, zona, severidad, mecanismo)</td>
+                            <td>M&eacute;dico / Kinesi&oacute;logo</td>
+                            <td>5 min/evento</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Una vez</strong></td>
+                            <td>Fecha de nacimiento, altura de padres, pierna h&aacute;bil</td>
+                            <td>Admin</td>
+                            <td>3 min/jugador</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== REFERENCES ==================== -->
+        <div class="slide" data-section="Referencias">
+            <div class="slide-content">
+                <span class="eyebrow">Respaldo</span>
+                <h2>Casos validados y fuentes</h2>
+
+                <div class="two-columns" style="margin-top: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.3rem;">Academias que lo aplican</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Club</th>
+                                    <th>Feature</th>
+                                    <th>Fuente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Ajax</td><td>ML + TIPS framework</td><td>ajaxdaily.com</td></tr>
+                                <tr><td>Bayern Munich</td><td>skills.lab Arena</td><td>fcbayern.com</td></tr>
+                                <tr><td>Chelsea FC</td><td>GPS tracking (paper)</td><td>MDPI Sports</td></tr>
+                                <tr><td>Dortmund</td><td>Cognitivo desde 11 a&ntilde;os</td><td>skysports.com</td></tr>
+                                <tr><td>Benfica</td><td>360S Lab + planes indiv.</td><td>Deloitte</td></tr>
+                                <tr><td>Man City/CFG</td><td>Hub central multi-club</td><td>the-footballanalyst</td></tr>
+                                <tr><td>RB Salzburg</td><td>Scouting data-driven</td><td>the-footballanalyst</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.3rem;">Papers acad&eacute;micos</h3>
+                        <ul class="feature-list" style="font-size: 0.95rem;">
+                            <li><span class="check">&#128218;</span><span>Chelsea GPS Tracking &mdash; MDPI Sports, 2018</span></li>
+                            <li><span class="check">&#128218;</span><span>ML for Injuries in Football &mdash; Sports Med Open, 2022</span></li>
+                            <li><span class="check">&#128218;</span><span>Predicting Injury in Youth Soccer &mdash; PMC, 2023</span></li>
+                            <li><span class="check">&#128218;</span><span>Tactical Evaluation Tools &mdash; SpringerPlus, 2015</span></li>
+                            <li><span class="check">&#128218;</span><span>Bio-banding Training Loads &mdash; PLOS ONE, 2025</span></li>
+                            <li><span class="check">&#128218;</span><span>ACWR Injury Risk (3 a&ntilde;os) &mdash; Br J Sports Med</span></li>
+                        </ul>
+
+                        <h3 style="font-size: 1.3rem; margin-top: 1.5rem;">Plataformas de referencia</h3>
+                        <div class="metric-pills">
+                            <span class="metric-pill">StatsBomb</span>
+                            <span class="metric-pill">Catapult</span>
+                            <span class="metric-pill">KINEXON</span>
+                            <span class="metric-pill">Playermaker</span>
+                            <span class="metric-pill">TransferLab</span>
+                            <span class="metric-pill">SciSports</span>
+                            <span class="metric-pill">Metrica Sports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CLOSING ==================== -->
+        <div class="slide title-slide" data-section="Cierre" style="padding: 30px 60px;">
+            <div class="slide-content" style="transform: scale(0.85); transform-origin: center center;">
+                <span class="eyebrow">Resumen</span>
+                <h1>Desarrollar jugadores con <span class="accent">inteligencia</span></h1>
+                <div class="title-divider"></div>
+                <p class="subtitle" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+                    Metodolog&iacute;as probadas en las mejores academias del mundo, adaptadas a nuestra realidad y listas para implementar de forma progresiva.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 1100px; margin: 1.2rem auto 0;">
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#128207;</div>
+                        <h3>Bio-banding</h3>
+                        <p>No perder talentos tard&iacute;os por juzgarlos con la vara equivocada</p>
+                    </div>
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#9888;&#65039;</div>
+                        <h3>Prevenci&oacute;n</h3>
+                        <p>Detectar riesgo de lesi&oacute;n antes de que ocurra con ACWR</p>
+                    </div>
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#128200;</div>
+                        <h3>M&eacute;tricas</h3>
+                        <p>Capturar contribuci&oacute;n real al juego, no solo goles</p>
+                    </div>
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#129504;</div>
+                        <h3>Cognitivo</h3>
+                        <p>Medir inteligencia futbol&iacute;stica, no solo capacidad f&iacute;sica</p>
+                    </div>
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#128142;</div>
+                        <h3>Four Corner</h3>
+                        <p>Visi&oacute;n integral del jugador en una sola vista</p>
+                    </div>
+                    <div class="closing-card stagger-item" style="padding: 1.2rem;">
+                        <div class="cc-icon" style="margin-bottom: 0.4rem;">&#128640;</div>
+                        <h3>Proyecci&oacute;n</h3>
+                        <p>Predecir qu&eacute; jugadores van a llegar a Primera</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script>
+        let currentSlide = 0;
+
+        function initSlides() {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, i) => {
+                if (i === 0) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            updateUI();
+        }
+
+        function updateUI() {
+            const slides = document.querySelectorAll('.slide');
+            const total = slides.length;
+            const progress = ((currentSlide + 1) / total) * 100;
+
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('slideCounter').textContent = (currentSlide + 1) + ' / ' + total;
+
+            const section = slides[currentSlide].dataset.section || '';
+            document.getElementById('sectionIndicator').textContent = section;
+        }
+
+        function goToSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            if (index === currentSlide || index < 0 || index >= slides.length) return;
+
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 600);
+
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            updateUI();
+        }
+
+        function nextSlide() {
+            const slides = document.querySelectorAll('.slide');
+            if (currentSlide < slides.length - 1) {
+                goToSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                goToSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' ||
+                e.key === 'Enter' || e.key === 'n' || e.key === 'N' ||
+                e.code === 'Space' || e.code === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            }
+            else if (e.key === 'ArrowLeft' || e.key === 'PageUp' ||
+                     e.key === 'Backspace' || e.key === 'p' || e.key === 'P' ||
+                     e.code === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            }
+            else if (e.key === 'Home') {
+                e.preventDefault();
+                goToSlide(0);
+            }
+            else if (e.key === 'End') {
+                e.preventDefault();
+                const slides = document.querySelectorAll('.slide');
+                goToSlide(slides.length - 1);
+            }
+            else if (e.key === 'F5' || e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            else if (e.key === 'Escape') {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Click to advance
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.nav-controls') &&
+                !e.target.closest('a') &&
+                !e.target.closest('button') &&
+                !e.target.closest('iframe') &&
+                !e.target.closest('.iframe-container')) {
+                nextSlide();
+            }
+        });
+
+        // Touch support
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 60) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        }, { passive: true });
+
+        window.addEventListener('load', initSlides);
+    </script>
+    <div class="logo-footer">
+        <img src="logo_exactas.png" alt="Logo Exactas">
+        <img src="logo_ic.png" alt="Logo IC">
+    </div>
+</body>
+</html>
